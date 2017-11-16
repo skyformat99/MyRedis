@@ -1,5 +1,5 @@
 #include "redis_slice.h"
-#include "my_logging.h"
+//#include "my_logging.h"
 
 namespace MyRedis {
 
@@ -15,10 +15,10 @@ bool RedisSlice::init(const std::list<RedisNodeInfo>& node_info_list) {
 	for (RedisNodeInfo node_info : node_info_list) {
 		if (RedisNodeInfo::REDIS_ROLE_MASTER == node_info.role() ) {
 			master_node_list.push_back(node_info);
-			LOG_INFO("redis info master redis:%s", node_info.to_json().c_str());
+			//LOG_INFO("redis info master redis:%s", node_info.to_json().c_str());
 		} else {
 			slave_node_list.push_back(node_info);
-			LOG_INFO("redis info master redis:%s", node_info.to_json().c_str());
+			//LOG_INFO("redis info master redis:%s", node_info.to_json().c_str());
 		}
 	}
 
@@ -38,7 +38,7 @@ RedisConn* RedisSlice::conn(RedisNodeInfo::REDIS_ROLE role) {
 	} else if (RedisNodeInfo::REDIS_ROLE_SLAVE == role){
 		return _slave_pool_mgr.conn();
 	} else {
-		LOG_ERROR("role error role:%d\n", role);
+		//LOG_ERROR("role error role:%d\n", role);
 		return NULL;
 	}
 }

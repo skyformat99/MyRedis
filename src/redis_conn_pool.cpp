@@ -1,6 +1,6 @@
 #include "redis_conn_pool.h"
 #include "redis_pool_mgr.h"
-#include "my_logging.h"
+//#include "my_logging.h"
 namespace MyRedis {
 	RedisConnPool::RedisConnPool(RedisPoolMgr * pool_mgr) : _pool_mgr(pool_mgr) {
 		_keep_alive_timer.StartTimer(g_default_keep_alive_interval, std::bind(&RedisConnPool::keep_alive, this));
@@ -87,11 +87,11 @@ namespace MyRedis {
 
 		// 激活失败的，下次继续激活
 		if (!err_keep_alive_pool.empty()) {
-			LOG_WARN("err keep alive count:%d", err_keep_alive_pool.size());
+			//LOG_WARN("err keep alive count:%d", err_keep_alive_pool.size());
 			add_keep_alive_conns(err_keep_alive_pool);
 		}
 
-		LOG_INFO("keep alive succ:%d, error:%d", succ_keep_alive_pool.size(), err_keep_alive_pool.size());
+		//LOG_INFO("keep alive succ:%d, error:%d", succ_keep_alive_pool.size(), err_keep_alive_pool.size());
 	}
 
 	void RedisConnPool::add_conns(std::list<RedisConn*>& add_conn_pool) {

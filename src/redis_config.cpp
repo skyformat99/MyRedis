@@ -1,5 +1,5 @@
 #include "redis_config.h"
-#include "my_logging.h"
+//#include "my_logging.h"
 
 namespace MyRedis {
 RedisConfig::RedisConfig() {
@@ -11,7 +11,7 @@ bool RedisConfig::init(const std::string& json_str) {
 	Json::Value root;
     if (!reader.parse(json_str, root, false) || 
 		!root["slice"].isArray()) {
-		LOG_FATAL("config formate error json:%s", json_str.c_str());
+		//LOG_FATAL("config formate error json:%s", json_str.c_str());
         return false;
     }
 	
@@ -21,13 +21,13 @@ bool RedisConfig::init(const std::string& json_str) {
 		node_info_list.clear();
 		JSON_GET_OBJ_ARRAY(json_slice_arr, idx, node_info_list, RedisNodeInfo);
 		if (node_info_list.empty()) {
-			LOG_WARN("config formate error json:%s", json_slice_arr[idx].toStyledString().c_str());
+			//LOG_WARN("config formate error json:%s", json_slice_arr[idx].toStyledString().c_str());
 			continue;
 		}
 		if (_key_2_redis_list.find(node_info_list.begin()->key()) == _key_2_redis_list.end()) {
 				_key_2_redis_list[node_info_list.begin()->key()] = node_info_list;
 		} else {
-			LOG_FATAL("config redis slice repeated json:%s", json_str.c_str());
+			//LOG_FATAL("config redis slice repeated json:%s", json_str.c_str());
 			return false;
 		}
 	}

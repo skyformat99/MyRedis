@@ -41,7 +41,7 @@ void* test_set(void *t) {
 		}
 
 		break;
-		
+
 	} while(true);
 	return NULL;
 }
@@ -56,7 +56,7 @@ void* test_del(void *t) {
 		}
 
 		break;
-		
+
 	} while(true);
 	return NULL;
 }
@@ -81,7 +81,7 @@ int main() {
 		return 0;
 	}
 	//单线程测试
-	//test_set(NULL);
+	test_set(NULL);
 	test_del(NULL);
 	//多线程测试
 	//multi_thread_test_cache();

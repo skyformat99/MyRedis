@@ -1,7 +1,7 @@
 #include "redis_conn.h"
 #include "redis_conn_pool.h"
 #include <hiredis/hiredis.h>
-#include "my_logging.h"
+//#include "my_logging.h"
 
 namespace MyRedis {
 RedisConn::RedisConn(RedisConnPool * pool) : _pool(pool),
@@ -31,8 +31,8 @@ bool RedisConn::ping() {
 	redisReply *reply = static_cast<redisReply *>(redisCommand(_ctx, "PING"));
 	if (NULL == reply) {
 		set_stat(CONN_STAT_ERROR);
-		LOG_WARN("ping error host:%s, port:%d, pwd:",
-			_node_info.host().c_str(), _node_info.port(), _node_info.password().c_str());
+		//LOG_WARN("ping error host:%s, port:%d, pwd:",
+		//	_node_info.host().c_str(), _node_info.port(), _node_info.password().c_str());
 		return false;
 	} else {
 		set_stat(CONN_STAT_CONNED);
@@ -55,12 +55,12 @@ bool RedisConn::conn() {
 	if (_ctx == NULL || _ctx->err) {
 		set_stat(CONN_STAT_ERROR);
 		if (_ctx) {
-			LOG_ERROR("conn error err:%s, host:%s, port:%d, pwd:",
-				_ctx->errstr, _node_info.host().c_str(), _node_info.port(), _node_info.password().c_str());
+			//LOG_ERROR("conn error err:%s, host:%s, port:%d, pwd:",
+			//	_ctx->errstr, _node_info.host().c_str(), _node_info.port(), _node_info.password().c_str());
 		} else {
 			std::cout << "Cant allocate redis context" << std::endl;
-			LOG_ERROR("conn error err:Cant allocate redis context, host:%s, port:%d, pwd:",
-				_node_info.host().c_str(), _node_info.port(), _node_info.password().c_str());
+			//LOG_ERROR("conn error err:Cant allocate redis context, host:%s, port:%d, pwd:",
+			//	_node_info.host().c_str(), _node_info.port(), _node_info.password().c_str());
 		}
 
 		return false;

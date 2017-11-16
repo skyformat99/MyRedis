@@ -1,6 +1,6 @@
 #include "redis_slice_mgr.h"
 #include "redis_slice.h"
-#include "my_logging.h"
+//#include "my_logging.h"
 
 namespace MyRedis {
 
@@ -23,7 +23,7 @@ bool RedisSliceMgr::init(const std::unordered_map<int, RedisNodeInfoList>& key_2
 
 RedisConn* RedisSliceMgr::conn(int key, RedisNodeInfo::REDIS_ROLE role) {
 	if (_key_2_slice.size() <= 0) {
-		LOG_FATAL("slice is empty func:%s, line:%d, key:%d\n", __FUNCTION__, __LINE__, key);
+		//LOG_FATAL("slice is empty func:%s, line:%d, key:%d\n", __FUNCTION__, __LINE__, key);
 		return NULL;
 	}
 	std::cout << "key:" << key << ",slice_size:" << _key_2_slice.size();

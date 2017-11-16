@@ -1,6 +1,6 @@
 #include "redis_pool_mgr.h"
 #include "redis_conn_pool.h"
-#include "my_logging.h"
+//#include "my_logging.h"
 
 namespace MyRedis {
 
@@ -19,7 +19,7 @@ bool RedisPoolMgr::init(const std::list<RedisNodeInfo>& node_list) {
     }
 
 	for (std::pair<std::string, RedisConnPool*> key_value: _ip_2_pool) {
-		LOG_INFO("pool info ip:%s, conn_count:%d", key_value.first.c_str(), key_value.second->conn_count());
+		//LOG_INFO("pool info ip:%s, conn_count:%d", key_value.first.c_str(), key_value.second->conn_count());
 	}
 
 	return true;
@@ -27,7 +27,7 @@ bool RedisPoolMgr::init(const std::list<RedisNodeInfo>& node_list) {
 
 RedisConn* RedisPoolMgr::conn() {
 	if (_pool_vec.size() <= 0) {
-		LOG_ERROR("pool empty func:%s, line:%d\n", __FUNCTION__, __LINE__);
+		//LOG_ERROR("pool empty func:%s, line:%d\n", __FUNCTION__, __LINE__);
 		return NULL;
 	}
 	int idx = get_rand_with_left(0, _pool_vec.size());
