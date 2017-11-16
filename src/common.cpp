@@ -1,5 +1,7 @@
 #include "common.h"
 #include <sstream>
+#include <assert.h>
+#include <iostream>
 
 
 namespace MyRedis {
@@ -24,11 +26,12 @@ int get_rand_with_left(int min, int max) {
 	//要取得[a,b)的随机整数，使用(rand() % (b-a))+ a; 
 	//要取得[a,b]的随机整数，使用(rand() % (b-a+1))+ a; 
 	//要取得(a,b]的随机整数，使用(rand() % (b-a))+ a + 1; 
-	if (max <= 1) {
-		return 0;
-	}
+
+	std::cout << "max:" << max << ",min:" << min << std::endl;
+	assert((max > min) && (min >= 0) && (max > 0));
+	
 	srand((unsigned)time(NULL));  
-	return (rand() % (max-min+1))+ min;
+	return (rand() % (max-min))+ min;
 }
 
 

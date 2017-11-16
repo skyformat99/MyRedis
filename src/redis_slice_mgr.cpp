@@ -26,7 +26,7 @@ RedisConn* RedisSliceMgr::conn(int key, RedisNodeInfo::REDIS_ROLE role) {
 		//LOG_FATAL("slice is empty func:%s, line:%d, key:%d\n", __FUNCTION__, __LINE__, key);
 		return NULL;
 	}
-	std::cout << "key:" << key << ",slice_size:" << _key_2_slice.size();
+	std::cout << "key:" << key << ",slice_size:" << _key_2_slice.size() << std::endl;
 	return _key_2_slice[key%_key_2_slice.size()]->conn(role);
 	//return _key_2_slice[0]->conn(role);
 }

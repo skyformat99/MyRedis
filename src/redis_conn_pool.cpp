@@ -2,8 +2,10 @@
 #include "redis_pool_mgr.h"
 //#include "my_logging.h"
 namespace MyRedis {
-	RedisConnPool::RedisConnPool(RedisPoolMgr * pool_mgr) : _pool_mgr(pool_mgr) {
-		_keep_alive_timer.StartTimer(g_default_keep_alive_interval, std::bind(&RedisConnPool::keep_alive, this));
+	RedisConnPool::RedisConnPool(RedisPoolMgr * pool_mgr) : _pool_mgr(pool_mgr),
+		_need_adjust_pool_conn_count(false),
+		_adjust_conn_pool_count(0) {
+		_keep_alive_timer.StartTimer(g_default_keep_alive_interval, std::bind(&RedisConnPool::timer_run, this));
 	}
 
 	RedisConnPool::~RedisConnPool() {
@@ -11,26 +13,7 @@ namespace MyRedis {
 
 	bool RedisConnPool::init(const RedisNodeInfo& node_info) {
 		_node_info = node_info;
-		std::list<RedisConn*> conn_pool;
-		std::list<RedisConn*> keep_alive_pool;
-		for (int idx = 0; idx < node_info.min_conn_count(); ++idx) {
-			RedisConn* conn = new RedisConn(this);
-			if (conn->init(node_info)) {
-				conn_pool.push_back(conn);
-			} else {
-				keep_alive_pool.push_back(conn);
-			}
-		}
-
-		//可用队列
-		_conn_pool_mutex.lock();
-		_conn_pool.swap(conn_pool);
-		_conn_pool_mutex.unlock();
-		
-		//待保活队列
-		_keep_alive_pool_mutex.lock();
-		_keep_alive_pool.swap(keep_alive_pool);
-		_keep_alive_pool_mutex.unlock();
+		adjust_pool_conn_count();
 
 		return true;
 	}
@@ -41,6 +24,11 @@ namespace MyRedis {
 
 		//从队列中找到一个可用的连接,把_coon_pool中不可用的连接加入到保活队列中
 		do {
+			if (_conn_pool.empty() && 
+				_node_info.min_conn_count()*_adjust_conn_pool_count < _node_info.max_conn_count()) {
+				_need_adjust_pool_conn_count = true;
+			}
+			
 			while(_conn_pool.empty()) {
 		   		_conn_pool_cond.wait(locker);
 			}
@@ -136,13 +124,14 @@ namespace MyRedis {
 		//遍历conn_pool 查找需要保活的连接
 		_conn_pool_mutex.lock();
 
-		for (std::list<RedisConn*>::iterator iter = _conn_pool.begin();
-			iter != _conn_pool.end(); ++iter){
+
+		std::list<RedisConn*>::iterator iter = _conn_pool.begin();
+		while (iter != _conn_pool.end()){
 			if ((*iter)->can_use() && RedisConn::CONN_STAT_CONNED == (*iter)->stat()) {
-				continue;
+				++iter;
 			} else {
 				need_keep_alive_pool.push_back(*iter);
-				_conn_pool.erase(iter);
+				iter = _conn_pool.erase(iter);
 			}
 		}
 		_conn_pool_mutex.unlock();
@@ -156,7 +145,48 @@ namespace MyRedis {
 		_keep_alive_pool_mutex.unlock();
 	}
 	int RedisConnPool::conn_count() const  {
-		return _conn_pool.size();
+		return _node_info.min_conn_count() * _adjust_conn_pool_count;
+	}
+
+	void RedisConnPool::timer_run() {
+		// 保活
+		keep_alive();
+
+		// 动态扩容连接池
+		if (_need_adjust_pool_conn_count) {
+			adjust_pool_conn_count();
+		}
+	}
+
+	void RedisConnPool::adjust_pool_conn_count() {
+		_need_adjust_pool_conn_count = false;
+		++_adjust_conn_pool_count;
+		std::list<RedisConn*> conn_pool;
+		std::list<RedisConn*> keep_alive_pool;
+		
+		for (int idx = 0; idx < _node_info.min_conn_count(); ++idx) {
+			RedisConn* conn = new RedisConn(this);
+			if (conn->init(_node_info)) {
+				conn_pool.push_back(conn);
+			} else {
+				keep_alive_pool.push_back(conn);
+			}
+		}
+
+		//可用队列
+		_conn_pool_mutex.lock();
+		_conn_pool.swap(conn_pool);
+		_conn_pool_mutex.unlock();
+		
+		//待保活队列
+		_keep_alive_pool_mutex.lock();
+		_keep_alive_pool.swap(keep_alive_pool);
+		_keep_alive_pool_mutex.unlock();
+
+		std::cout << __FUNCTION__ << ":" << __LINE__ 
+			<< ":" << _adjust_conn_pool_count 
+			<< ":" << _node_info.min_conn_count()  
+			<< ":" << _node_info.max_conn_count() << std::endl;
 	}
 
 }
