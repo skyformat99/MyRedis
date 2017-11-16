@@ -1,0 +1,22 @@
+#include "redis_cache.h"
+namespace MyRedis {
+RedisCache::RedisCache() : _slice_mgr(this) {
+}
+
+bool RedisCache::init(const std :: string & json_conf_str) {
+	if (!_config.init(json_conf_str)) {
+		return false;
+	}
+
+	if (!_slice_mgr.init(_config.redis_config())) {
+		return false;
+	}
+	return true;
+}
+
+RedisConn* RedisCache::conn(int key, RedisNodeInfo::REDIS_ROLE role) {
+	std::cout << __FUNCTION__ << ",key:" << key << std::endl;
+	return _slice_mgr.conn(key, role);
+}
+
+}
